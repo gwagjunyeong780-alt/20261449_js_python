@@ -18,5 +18,5 @@ c = str(input("세번째 값 :"))
 ## print(a,"/",b,"=",result1)
 ## print(a,"+",b,"=",result2)
 ## print(a,"-",b,"=",result3)
-print(a,"and",b , "and" , c)
+print
 
