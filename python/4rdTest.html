@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang = "ko">
+    <head> 
+        <title>
+            가제 : 계산기
+        </title>
+    </head>
+    <body>
+        <div id="contents">
+            <ul>
+                <li>
+                    <label for="price1"> 가격 </label>
+                    <input type="text" id="price1"> 원 
+                </li>
+                  <li>
+                    <label for="price2"> 가격 </label>
+                    <input type="text" id="price2"> 원 
+                </li>
+                <li>
+                    <label for="price3"> 가격 </label>
+                    <input type="text" id="price3"> 원
+                </li>
+                <li>
+                    <button onclick="showPrice()"> 총 가격 계산하기 </button>
+                </li>
+            </ul>
+            <div id="showResult"> </div>
+        </div>
+        
+        <script>
+            function showPrice() {
+                var price1 = Number(document.querySelector("#price1").value);
+                var price2 = Number(document.querySelector("#price2").value);
+                var price3 = Number(document.querySelector("#price3").value);
+                var endPrice = price1 + price2 + price3;
+                var member;
+                var rate;
+                var pointPrice;
+
+                if (endPrice >= 50000) {
+                    member = "골드 멤버";
+                    rate = 3;
+                } else if (endPrice >= 30000) {
+                    member = "실버 멤버";
+                    rate = 2;
+                } else {
+                    member = "브론즈 멤버";
+                    rate = 1;
+                }
+
+                pointPrice = endPrice * rate / 100;
+                
+                document.querySelector("#showResult").innerHTML =
+                    "상품들의 가격의 총합은 " + endPrice + "원이며, " + member +
+                    "입니다.<br>적립률은 " + rate + "%이고, 적립금은 " + pointPrice + "원입니다.";
+            }
+        </script>
+    </body>
+</html>
