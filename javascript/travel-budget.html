@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6f7f2">
+    <title>여행 한 장 - 여행 도우미</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #202a25;
+            --muted: #778078;
+            --green: #27654b;
+            --green-dark: #1e503b;
+            --paper: #f6f7f2;
+            --line: #e7eae3;
+            --white: #fff;
+            --red: #b64242;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+        }
+
+        button, input, select { font: inherit; }
+        button { cursor: pointer; }
+
+        .page {
+            width: min(100% - 40px, 1080px);
+            margin: 0 auto;
+            padding: 38px 0 64px;
+        }
+
+        header { margin-bottom: 28px; }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--green);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .03em;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 30px;
+            height: 30px;
+            place-items: center;
+            border-radius: 10px;
+            background: #e1ede5;
+            font-size: 16px;
+        }
+
+        h1 {
+            margin: 19px 0 7px;
+            font-size: clamp(27px, 5vw, 38px);
+            letter-spacing: -.055em;
+        }
+
+        header p, .section-note {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .panel {
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--white);
+            box-shadow: 0 6px 24px rgb(34 52 40 / 3%);
+        }
+
+        .panel + .panel { margin-top: 18px; }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0 0 19px;
+            font-size: 18px;
+            letter-spacing: -.03em;
+        }
+
+        .heading-icon { font-size: 19px; }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .field.full { grid-column: 1 / -1; }
+
+        label {
+            color: #4e5851;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input, select {
+            width: 100%;
+            min-height: 46px;
+            padding: 0 13px;
+            border: 1px solid #dfe4dc;
+            border-radius: 10px;
+            outline: none;
+            background: var(--white);
+            color: var(--ink);
+        }
+
+        input::placeholder { color: #a5ada6; }
+        input:focus, select:focus {
+            border-color: #6e9b7f;
+            box-shadow: 0 0 0 3px rgb(39 101 75 / 10%);
+        }
+
+        .input-with-unit { position: relative; }
+        .input-with-unit input { padding-right: 43px; }
+        .unit {
+            position: absolute;
+            top: 50%;
+            right: 13px;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        .primary-button {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 18px;
+            border: 0;
+            border-radius: 11px;
+            background: var(--green);
+            color: var(--white);
+            font-weight: 800;
+            transition: background .15s ease, transform .15s ease;
+        }
+
+        .primary-button:hover { background: var(--green-dark); }
+        .primary-button:active { transform: scale(.99); }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .destination {
+            overflow: hidden;
+            max-width: 180px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #edf3ee;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 800;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .total-label { margin: 19px 0 5px; color: var(--muted); font-size: 13px; }
+        .total { margin: 0; font-size: clamp(30px, 5vw, 40px); letter-spacing: -.05em; }
+
+        .budget-track {
+            overflow: hidden;
+            height: 9px;
+            margin: 19px 0 9px;
+            border-radius: 99px;
+            background: #edf0eb;
+        }
+
+        .budget-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #62a37b;
+            transition: width .25s ease, background .25s ease;
+        }
+
+        .budget-fill.over { background: var(--red); }
+        .budget-caption { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+        .budget-caption span:first-child { color: var(--muted); }
+        .budget-caption span:last-child { font-weight: 800; }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            padding: 13px;
+            border-radius: 12px;
+            background: #f7f8f5;
+        }
+
+        .stat-label { margin: 0 0 5px; color: var(--muted); font-size: 12px; }
+        .stat-value { margin: 0; font-size: 16px; font-weight: 800; }
+
+        .category-list { display: grid; gap: 15px; }
+        .category-row { display: grid; gap: 7px; }
+        .category-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+        .category-name { color: #566159; }
+        .category-amount { font-weight: 750; }
+        .category-track { height: 6px; overflow: hidden; border-radius: 99px; background: #edf0eb; }
+        .category-fill { height: 100%; border-radius: inherit; background: #76a68a; }
+
+        .expense-list { display: grid; gap: 9px; }
+        .expense-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f1ed;
+        }
+        .expense-item:last-child { border-bottom: 0; padding-bottom: 0; }
+        .expense-info { min-width: 0; }
+        .expense-title { overflow: hidden; margin: 0 0 4px; font-size: 14px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+        .expense-category { margin: 0; color: var(--muted); font-size: 12px; }
+        .expense-end { display: flex; flex-shrink: 0; align-items: center; gap: 10px; }
+        .expense-amount { font-size: 14px; font-weight: 800; }
+        .delete-button {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--white);
+            color: #68736b;
+            font-size: 16px;
+        }
+        .delete-button:hover { border-color: #e9caca; color: var(--red); }
+
+        .empty-state {
+            padding: 20px 8px 5px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin: 25px 0 20px;
+            padding: 6px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--white);
+            scrollbar-width: thin;
+        }
+
+        .tab-button {
+            flex: 1 0 auto;
+            min-height: 42px;
+            padding: 0 15px;
+            border: 0;
+            border-radius: 9px;
+            background: transparent;
+            color: #626d65;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .tab-button[aria-selected="true"] {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .tab-panel[hidden] { display: none; }
+        .tab-intro { margin-bottom: 18px; }
+        .tab-intro h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.04em; }
+        .tab-intro p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+        .trip-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 11px;
+            margin-top: 19px;
+        }
+
+        .trip-summary .stat { min-width: 0; }
+        .trip-summary .stat-value { overflow-wrap: anywhere; }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .search-grid .field.full { grid-column: 1 / -1; }
+        .result-box {
+            margin-top: 18px;
+            padding: 16px;
+            border: 1px solid #e7ece6;
+            border-radius: 12px;
+            background: #f8faf7;
+        }
+
+        .result-box h3 { margin: 0 0 6px; font-size: 15px; }
+        .result-box p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+        .result-link {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 13px;
+            padding: 0 14px;
+            border: 1px solid #cbd9ce;
+            border-radius: 9px;
+            background: var(--white);
+            color: var(--green-dark);
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .result-link:hover { background: #edf3ee; }
+        .map-frame {
+            display: block;
+            width: 100%;
+            height: 390px;
+            margin-top: 17px;
+            border: 0;
+            border-radius: 14px;
+            background: #eef1ed;
+        }
+
+        .map-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .api-note {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-left: 3px solid #82a98e;
+            border-radius: 0 9px 9px 0;
+            background: #f5f8f4;
+            color: #626d65;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 720px) {
+            .page { width: min(100% - 28px, 520px); padding-top: 25px; }
+            .layout { grid-template-columns: 1fr; }
+            .panel { padding: 21px; }
+            .trip-summary { grid-template-columns: 1fr 1fr; }
+            .map-frame { height: 330px; }
+        }
+
+        @media (max-width: 390px) {
+            .field-grid, .search-grid { grid-template-columns: 1fr; }
+            .field.full, .search-grid .field.full { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header>
+            <div class="brand"><span class="brand-mark" aria-hidden="true">✈</span> 여행 한 장</div>
+            <h1>여행 준비부터 현지 탐색까지</h1>
+            <p>여행 정보를 한 번 입력하고 항공편, 숙소, 주변 맛집과 예산을 한곳에서 준비해요.</p>
+        </header>
+
+        <nav class="tab-list" role="tablist" aria-label="여행 도우미 메뉴">
+            <button class="tab-button" id="tab-trip" type="button" role="tab" aria-selected="true" aria-controls="panel-trip">여행 정보</button>
+            <button class="tab-button" id="tab-flights" type="button" role="tab" aria-selected="false" aria-controls="panel-flights" tabindex="-1">항공편</button>
+            <button class="tab-button" id="tab-stays" type="button" role="tab" aria-selected="false" aria-controls="panel-stays" tabindex="-1">숙소</button>
+            <button class="tab-button" id="tab-food" type="button" role="tab" aria-selected="false" aria-controls="panel-food" tabindex="-1">맛집 지도</button>
+            <button class="tab-button" id="tab-budget" type="button" role="tab" aria-selected="false" aria-controls="panel-budget" tabindex="-1">여행 경비</button>
+        </nav>
+
+        <section class="tab-panel" id="panel-trip" role="tabpanel" aria-labelledby="tab-trip">
+            <div class="tab-intro">
+                <h2>여행 정보를 입력해 주세요</h2>
+                <p>여기서 입력한 목적지와 일정, 인원은 항공편·숙소·맛집 검색에 함께 사용돼요.</p>
+            </div>
+            <section class="panel">
+                <form id="planner-form">
+                    <div class="search-grid">
+                        <div class="field">
+                            <label for="destination">여행지</label>
+                            <input id="destination" name="destination" type="text" placeholder="예: 제주도" maxlength="60" required>
+                        </div>
+                        <div class="field">
+                            <label for="origin">출발지</label>
+                            <input id="origin" name="origin" type="text" placeholder="예: 서울" maxlength="60" required>
+                        </div>
+                        <div class="field">
+                            <label for="departure-date">출발일</label>
+                            <input id="departure-date" name="departure-date" type="date" required>
+                        </div>
+                        <div class="field">
+                            <label for="return-date">귀국일</label>
+                            <input id="return-date" name="return-date" type="date" required>
+                        </div>
+                        <div class="field">
+                            <label for="trip-people">여행 인원</label>
+                            <div class="input-with-unit">
+                                <input id="trip-people" name="people" type="number" min="1" max="100" step="1" value="1" required>
+                                <span class="unit">명</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="primary-button" type="submit">여행 정보 저장하기</button>
+                </form>
+                <div class="trip-summary" aria-live="polite">
+                    <div class="stat"><p class="stat-label">목적지</p><p class="stat-value" id="trip-destination">아직 입력 안 됨</p></div>
+                    <div class="stat"><p class="stat-label">출발지</p><p class="stat-value" id="trip-origin">아직 입력 안 됨</p></div>
+                    <div class="stat"><p class="stat-label">여행 일정</p><p class="stat-value" id="trip-dates">날짜를 선택해 주세요</p></div>
+                    <div class="stat"><p class="stat-label">인원</p><p class="stat-value" id="trip-party">1명</p></div>
+                </div>
+                <div class="api-note">이 사이트의 여행 정보와 경비 계산은 브라우저 안에서 동작합니다. 항공편·숙소 실시간 가격 결과는 API 서버 연동이 완료된 뒤 표시됩니다.</div>
+            </section>
+        </section>
+
+        <section class="tab-panel" id="panel-flights" role="tabpanel" aria-labelledby="tab-flights" hidden>
+            <div class="tab-intro">
+                <h2>항공편 찾기</h2>
+                <p>여행 정보에 입력한 출발지와 날짜로 항공권 검색을 준비해요.</p>
+            </div>
+            <section class="panel">
+                <div class="summary-stats">
+                    <div class="stat"><p class="stat-label">출발 → 도착</p><p class="stat-value" id="flight-route">여행 정보를 먼저 입력해 주세요</p></div>
+                    <div class="stat"><p class="stat-label">여행 날짜</p><p class="stat-value" id="flight-dates">-</p></div>
+                </div>
+                <div class="result-box" aria-live="polite">
+                    <h3>Skyscanner에서 항공편 비교하기</h3>
+                    <p>위에 표시된 출발지와 여행 날짜를 참고해 Skyscanner에서 목적지를 입력하고 항공편을 비교해 보세요. 이 링크는 Skyscanner를 새 탭으로 엽니다.</p>
+                    <a class="result-link" id="flight-search-link" href="https://www.skyscanner.net/" target="_blank" rel="noopener noreferrer">Skyscanner에서 항공편 찾기</a>
+                </div>
+                <div class="api-note">API 키를 브라우저 코드에 직접 넣지 않도록, 추후 서버 환경변수와 검색 API를 통해 결과를 연결할 수 있게 구성했어요.</div>
+            </section>
+        </section>
+
+        <section class="tab-panel" id="panel-stays" role="tabpanel" aria-labelledby="tab-stays" hidden>
+            <div class="tab-intro">
+                <h2>숙소 찾기</h2>
+                <p>여행지와 일정에 맞는 숙소를 찾아보세요.</p>
+            </div>
+            <section class="panel">
+                <div class="summary-stats">
+                    <div class="stat"><p class="stat-label">숙박 지역</p><p class="stat-value" id="stay-destination">여행 정보를 먼저 입력해 주세요</p></div>
+                    <div class="stat"><p class="stat-label">체크인 → 체크아웃</p><p class="stat-value" id="stay-dates">-</p></div>
+                </div>
+                <div class="result-box" aria-live="polite">
+                    <h3>실시간 숙소 검색은 API 연결이 필요해요</h3>
+                    <p>Google Travel에서 해당 지역 숙소를 살펴볼 수 있어요. 사이트 안에 숙소·가격 결과를 표시하려면 숙박 검색 API와 서버 연동이 필요합니다.</p>
+                    <a class="result-link" id="stay-search-link" href="https://www.google.com/travel/" target="_blank" rel="noopener noreferrer">Google Travel에서 검색</a>
+                </div>
+                <div class="api-note">실시간 숙소 가격을 제공하는 API는 지역과 제공업체에 따라 이용 자격·요금·표시 정책이 다를 수 있어요.</div>
+            </section>
+        </section>
+
+        <section class="tab-panel" id="panel-food" role="tabpanel" aria-labelledby="tab-food" hidden>
+            <div class="tab-intro">
+                <h2>주변 맛집 찾기</h2>
+                <p>목적지 근처 음식점을 Google 지도에서 검색해요.</p>
+            </div>
+            <section class="panel">
+                <form id="food-form">
+                    <div class="search-grid">
+                        <div class="field">
+                            <label for="food-location">지역 또는 주소</label>
+                            <input id="food-location" type="text" placeholder="여행지 정보를 입력하면 자동으로 채워져요" maxlength="100" required>
+                        </div>
+                        <div class="field">
+                            <label for="food-query">음식 종류 <span style="font-weight: 400; color: #929a93;">(선택)</span></label>
+                            <input id="food-query" type="text" placeholder="예: 흑돼지, 카페, 한식" maxlength="60">
+                        </div>
+                    </div>
+                    <button class="primary-button" type="submit">Google 지도에서 주변 음식점 찾기</button>
+                </form>
+                <div class="map-actions">
+                    <a class="result-link" id="map-open-link" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">Google 지도에서 크게 보기</a>
+                </div>
+                <iframe class="map-frame" id="food-map" title="Google 지도 주변 음식점 검색 결과" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=restaurants%20in%20South%20Korea&amp;output=embed"></iframe>
+                <div class="api-note">지도와 장소 검색은 Google 지도의 검색 페이지를 사용합니다. 별도의 지도 API 키를 등록하기 전에도 검색 지도는 이용할 수 있어요.</div>
+            </section>
+        </section>
+
+        <section class="tab-panel" id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" hidden>
+            <div class="tab-intro">
+                <h2>여행 경비 계산</h2>
+                <p>예산과 지출을 기록하고 남은 금액과 1인당 비용을 확인해요.</p>
+            </div>
+            <div class="layout">
+                <div>
+                    <section class="panel" aria-labelledby="budget-trip-heading">
+                        <h2 class="section-heading" id="budget-trip-heading"><span class="heading-icon" aria-hidden="true">💰</span> 전체 예산</h2>
+                        <form id="budget-form">
+                            <div class="field">
+                                <label for="budget">전체 예산</label>
+                                <div class="input-with-unit">
+                                    <input id="budget" name="budget" type="number" min="1" step="1" placeholder="500000" required>
+                                    <span class="unit">원</span>
+                                </div>
+                            </div>
+                            <button class="primary-button" type="submit">예산 적용하기</button>
+                        </form>
+                    </section>
+
+                    <section class="panel" aria-labelledby="expense-heading">
+                        <h2 class="section-heading" id="expense-heading"><span class="heading-icon" aria-hidden="true">🧾</span> 지출 추가</h2>
+                        <form id="expense-form">
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="category">항목</label>
+                                    <select id="category" name="category">
+                                        <option>교통</option><option>숙박</option><option>식비</option>
+                                        <option>관광</option><option>쇼핑</option><option>기타</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="amount">금액</label>
+                                    <div class="input-with-unit">
+                                        <input id="amount" name="amount" type="number" min="1" step="1" placeholder="15000" required>
+                                        <span class="unit">원</span>
+                                    </div>
+                                </div>
+                                <div class="field full">
+                                    <label for="memo">메모 <span style="font-weight: 400; color: #929a93;">(선택)</span></label>
+                                    <input id="memo" name="memo" type="text" maxlength="60" placeholder="예: 공항에서 숙소까지 택시">
+                                </div>
+                            </div>
+                            <button class="primary-button" type="submit">지출 기록하기</button>
+                        </form>
+                    </section>
+                </div>
+
+                <div>
+                    <section class="panel" aria-labelledby="summary-heading" aria-live="polite">
+                        <div class="summary-top">
+                            <h2 class="section-heading" id="summary-heading" style="margin-bottom: 0;"><span class="heading-icon" aria-hidden="true">📊</span> 예산 요약</h2>
+                            <span class="destination" id="summary-destination">여행 준비 중</span>
+                        </div>
+                        <p class="total-label">지금까지 쓴 금액</p>
+                        <p class="total" id="total-spent">₩0</p>
+                        <div class="budget-track" role="progressbar" aria-label="예산 사용량" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="budget-fill" id="budget-fill"></div>
+                        </div>
+                        <div class="budget-caption">
+                            <span id="budget-caption">예산을 입력해 주세요</span>
+                            <span id="budget-percent">0%</span>
+                        </div>
+                        <div class="summary-stats">
+                            <div class="stat"><p class="stat-label">남은 예산</p><p class="stat-value" id="remaining-budget">-</p></div>
+                            <div class="stat"><p class="stat-label">1인당 사용액</p><p class="stat-value" id="per-person">₩0</p></div>
+                        </div>
+                    </section>
+
+                    <section class="panel" aria-labelledby="category-heading">
+                        <h2 class="section-heading" id="category-heading"><span class="heading-icon" aria-hidden="true">🗂️</span> 항목별 지출</h2>
+                        <div class="category-list" id="category-list"></div>
+                    </section>
+
+                    <section class="panel" aria-labelledby="list-heading">
+                        <h2 class="section-heading" id="list-heading"><span class="heading-icon" aria-hidden="true">📝</span> 지출 내역 <span id="expense-count" style="color: #929a93; font-size: 13px; font-weight: 600;"></span></h2>
+                        <div class="expense-list" id="expense-list"></div>
+                    </section>
+                </div>
+            </div>
+        </section>
+
+        <p class="sr-only" id="status" role="status"></p>
+    </main>
+
+    <script>
+        const categories = ["교통", "숙박", "식비", "관광", "쇼핑", "기타"];
+        const won = new Intl.NumberFormat("ko-KR", {
+            style: "currency",
+            currency: "KRW",
+            maximumFractionDigits: 0
+        });
+
+        let budget = 0;
+        let people = 1;
+        let destination = "";
+        let origin = "";
+        let departureDate = "";
+        let returnDate = "";
+        let expenses = [];
+
+        const plannerForm = document.querySelector("#planner-form");
+        const budgetForm = document.querySelector("#budget-form");
+        const expenseForm = document.querySelector("#expense-form");
+        const categoryList = document.querySelector("#category-list");
+        const expenseList = document.querySelector("#expense-list");
+        const progressBar = document.querySelector(".budget-track");
+        const status = document.querySelector("#status");
+
+        const tabButtons = [...document.querySelectorAll('[role="tab"]')];
+
+        tabButtons.forEach((button, index) => {
+            button.addEventListener("click", () => activateTab(button));
+            button.addEventListener("keydown", (event) => {
+                let nextIndex = index;
+                if (event.key === "ArrowRight") nextIndex = (index + 1) % tabButtons.length;
+                else if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+                else if (event.key === "Home") nextIndex = 0;
+                else if (event.key === "End") nextIndex = tabButtons.length - 1;
+                else return;
+
+                event.preventDefault();
+                tabButtons[nextIndex].focus();
+                activateTab(tabButtons[nextIndex]);
+            });
+        });
+
+        function activateTab(activeButton) {
+            tabButtons.forEach((button) => {
+                const selected = button === activeButton;
+                button.setAttribute("aria-selected", String(selected));
+                button.tabIndex = selected ? 0 : -1;
+                document.getElementById(button.getAttribute("aria-controls")).hidden = !selected;
+            });
+        }
+
+        plannerForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const returnInput = document.querySelector("#return-date");
+            returnInput.setCustomValidity(
+                returnInput.value && returnInput.value < document.querySelector("#departure-date").value
+                    ? "귀국일은 출발일보다 빠를 수 없습니다."
+                    : ""
+            );
+            if (!plannerForm.reportValidity()) return;
+
+            destination = document.querySelector("#destination").value.trim();
+            origin = document.querySelector("#origin").value.trim();
+            departureDate = document.querySelector("#departure-date").value;
+            returnDate = document.querySelector("#return-date").value;
+            people = Number(document.querySelector("#trip-people").value);
+            updateTripDetails();
+            render();
+            status.textContent = "여행 정보를 적용했어요.";
+        });
+
+        document.querySelector("#return-date").addEventListener("input", (event) => {
+            event.currentTarget.setCustomValidity("");
+        });
+
+        budgetForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (!budgetForm.reportValidity()) return;
+
+            budget = Number(document.querySelector("#budget").value);
+            render();
+            status.textContent = "여행 예산을 적용했어요.";
+        });
+
+        document.querySelector("#food-form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const foodForm = event.currentTarget;
+            if (!foodForm.reportValidity()) return;
+
+            updateMap();
+            status.textContent = "Google 지도에서 주변 음식점 검색을 업데이트했어요.";
+        });
+
+        expenseForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (!expenseForm.reportValidity()) return;
+
+            const amount = Number(document.querySelector("#amount").value);
+            if (!Number.isSafeInteger(amount) || amount < 1) {
+                document.querySelector("#amount").setCustomValidity("1원 이상의 금액을 입력해 주세요.");
+                document.querySelector("#amount").reportValidity();
+                return;
+            }
+
+            expenses.unshift({
+                id: crypto.randomUUID(),
+                category: document.querySelector("#category").value,
+                amount,
+                memo: document.querySelector("#memo").value.trim()
+            });
+            expenseForm.reset();
+            render();
+            status.textContent = "지출을 기록했어요.";
+        });
+
+        document.querySelector("#amount").addEventListener("input", (event) => {
+            event.currentTarget.setCustomValidity("");
+        });
+
+        expenseList.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-expense-id]");
+            if (!button) return;
+
+            expenses = expenses.filter((expense) => expense.id !== button.dataset.expenseId);
+            render();
+            status.textContent = "지출 내역을 삭제했어요.";
+        });
+
+        function formatDate(value) {
+            if (!value) return "";
+            return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" })
+                .format(new Date(`${value}T00:00:00`));
+        }
+
+        function updateTripDetails() {
+            const dates = `${formatDate(departureDate)} – ${formatDate(returnDate)}`;
+            document.querySelector("#trip-destination").textContent = destination;
+            document.querySelector("#trip-origin").textContent = origin;
+            document.querySelector("#trip-dates").textContent = dates;
+            document.querySelector("#trip-party").textContent = `${people}명`;
+
+            document.querySelector("#flight-route").textContent = `${origin} → ${destination}`;
+            document.querySelector("#flight-dates").textContent = dates;
+            document.querySelector("#stay-destination").textContent = destination;
+            document.querySelector("#stay-dates").textContent = dates;
+            document.querySelector("#summary-destination").textContent = destination;
+            document.querySelector("#food-location").value = destination;
+
+            const hotelQuery = `Hotels in ${destination} ${departureDate} ${returnDate}`;
+            document.querySelector("#stay-search-link").href =
+                `https://www.google.com/travel/search?q=${encodeURIComponent(hotelQuery)}`;
+            updateMap();
+        }
+
+        function updateMap() {
+            const location = document.querySelector("#food-location").value.trim();
+            const food = document.querySelector("#food-query").value.trim();
+            const query = `${food || "restaurants"} in ${location}`;
+            document.querySelector("#food-map").src =
+                `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+            document.querySelector("#map-open-link").href =
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+        }
+
+        function addTextElement(parent, tagName, className, text) {
+            const element = document.createElement(tagName);
+            element.className = className;
+            element.textContent = text;
+            parent.append(element);
+            return element;
+        }
+
+        function render() {
+            const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const percent = budget > 0 ? Math.round((total / budget) * 100) : 0;
+            const boundedPercent = Math.min(percent, 100);
+
+            document.querySelector("#summary-destination").textContent = destination || "여행 준비 중";
+            document.querySelector("#total-spent").textContent = won.format(total);
+            document.querySelector("#remaining-budget").textContent = budget > 0
+                ? (budget - total < 0 ? "-" : "") + won.format(Math.abs(budget - total))
+                : "-";
+            document.querySelector("#per-person").textContent = won.format(Math.round(total / people));
+            document.querySelector("#budget-caption").textContent = budget > 0
+                ? `전체 예산 ${won.format(budget)}`
+                : "예산을 입력해 주세요";
+            document.querySelector("#budget-percent").textContent = `${percent}%`;
+            document.querySelector("#budget-fill").style.width = `${boundedPercent}%`;
+            document.querySelector("#budget-fill").classList.toggle("over", budget > 0 && total > budget);
+            progressBar.setAttribute("aria-valuenow", String(boundedPercent));
+            progressBar.setAttribute("aria-valuetext", budget > 0 ? `예산의 ${percent}% 사용` : "예산 미입력");
+
+            renderCategories(total);
+            renderExpenses();
+        }
+
+        function renderCategories(total) {
+            categoryList.replaceChildren();
+
+            categories.forEach((category) => {
+                const amount = expenses
+                    .filter((expense) => expense.category === category)
+                    .reduce((sum, expense) => sum + expense.amount, 0);
+                const row = document.createElement("div");
+                row.className = "category-row";
+
+                const meta = document.createElement("div");
+                meta.className = "category-meta";
+                addTextElement(meta, "span", "category-name", category);
+                addTextElement(meta, "span", "category-amount", won.format(amount));
+
+                const track = document.createElement("div");
+                track.className = "category-track";
+                track.setAttribute("aria-hidden", "true");
+                const fill = document.createElement("div");
+                fill.className = "category-fill";
+                fill.style.width = `${total > 0 ? (amount / total) * 100 : 0}%`;
+                track.append(fill);
+
+                row.append(meta, track);
+                categoryList.append(row);
+            });
+        }
+
+        function renderExpenses() {
+            expenseList.replaceChildren();
+            document.querySelector("#expense-count").textContent = `(${expenses.length})`;
+
+            if (expenses.length === 0) {
+                addTextElement(expenseList, "p", "empty-state", "아직 기록된 지출이 없어요. 첫 지출을 추가해 보세요.");
+                return;
+            }
+
+            expenses.forEach((expense) => {
+                const item = document.createElement("div");
+                item.className = "expense-item";
+
+                const info = document.createElement("div");
+                info.className = "expense-info";
+                addTextElement(info, "p", "expense-title", expense.memo || expense.category);
+                addTextElement(info, "p", "expense-category", expense.memo ? expense.category : "지출");
+
+                const end = document.createElement("div");
+                end.className = "expense-end";
+                addTextElement(end, "span", "expense-amount", won.format(expense.amount));
+
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "delete-button";
+                remove.dataset.expenseId = expense.id;
+                remove.setAttribute("aria-label", `${expense.memo || expense.category} 지출 삭제`);
+                remove.textContent = "×";
+                end.append(remove);
+
+                item.append(info, end);
+                expenseList.append(item);
+            });
+        }
+
+        render();
+    </script>
+</body>
+</html>
